@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Loader2, Image as ImageIcon, Copy, Wand2 } from "lucide-react";
+import { Sparkles, Loader2, Image as ImageIcon, Download } from "lucide-react";
 import { generateImage } from "@/app/api/aiToolsApi";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -11,13 +11,11 @@ import { Textarea } from "@/components/ui/textarea";
 export function ImageGeneration() {
     const [prompt, setPrompt] = useState("");
     const [loading, setLoading] = useState(false);
-    const [result, setResult] = useState<string | null>(null);
     const [imageUrl, setImageUrl] = useState<string | null>(null);
 
     const handleGenerate = async () => {
         if (!prompt.trim()) return;
         setLoading(true);
-        setResult(null);
         setImageUrl(null);
 
         try {
@@ -27,7 +25,6 @@ export function ImageGeneration() {
                     // Native Gemini Image
                     const base64Image = `data:image/png;base64,${data.output.image}`;
                     setImageUrl(base64Image);
-                    setResult(data.output.caption || prompt);
                     toast.success("Image generated successfully!");
                 } else if (data.output.enhanced_prompt) {
                     // Fallback to Pollinations
@@ -35,7 +32,6 @@ export function ImageGeneration() {
                         toast.info("Quota exceeded for native image. Using free generator.");
                     }
                     const enhancedPrompt = data.output.enhanced_prompt;
-                    setResult(enhancedPrompt);
                     const encodedPrompt = encodeURIComponent(enhancedPrompt);
                     const generatedUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&seed=${Math.floor(Math.random() * 1000000)}&nologo=true`;
                     setImageUrl(generatedUrl);
@@ -50,6 +46,27 @@ export function ImageGeneration() {
             }
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDownload = async () => {
+        if (!imageUrl) return;
+
+        try {
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `generated-image-${Date.now()}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            toast.success("Image downloaded successfully!");
+        } catch (error) {
+            console.error('Download failed:', error);
+            toast.error("Failed to download image");
         }
     };
 
@@ -105,7 +122,7 @@ export function ImageGeneration() {
                     </div>
 
                     <AnimatePresence mode="wait">
-                        {(imageUrl || result) && (
+                        {imageUrl && (
                             <motion.div
                                 initial={{ opacity: 0, height: 0 }}
                                 animate={{ opacity: 1, height: "auto" }}
@@ -113,36 +130,33 @@ export function ImageGeneration() {
                                 className="space-y-6"
                             >
                                 {/* Generated Image Section */}
-                                {imageUrl && (
-                                    <div className="rounded-xl overflow-hidden border border-gray-200 shadow-lg bg-gray-50">
-                                        <div className="relative aspect-square w-full max-w-2xl mx-auto">
-                                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                                            <img
-                                                src={imageUrl}
-                                                alt="Generated AI Art"
-                                                className="w-full h-full object-cover"
-                                                loading="lazy"
-                                            />
-                                        </div>
-                                        <div className="p-4 bg-white border-t border-gray-100 flex justify-end gap-2">
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => window.open(imageUrl, '_blank')}
-                                            >
-                                                <Copy className="w-4 h-4 mr-2" />
-                                                Open Full Size
-                                            </Button>
-                                        </div>
+                                <div className="rounded-xl overflow-hidden border border-gray-200 shadow-lg bg-gray-50">
+                                    <div className="relative aspect-square w-full max-w-2xl mx-auto">
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                        <img
+                                            src={imageUrl}
+                                            alt="Generated AI Art"
+                                            className="w-full h-full object-cover"
+                                            loading="lazy"
+                                        />
                                     </div>
-                                )}
-
-
+                                    <div className="p-4 bg-white border-t border-gray-100 flex justify-end gap-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={handleDownload}
+                                            className="hover:bg-violet-50 text-violet-600 border-violet-200"
+                                        >
+                                            <Download className="w-4 h-4 mr-2" />
+                                            Download Image
+                                        </Button>
+                                    </div>
+                                </div>
                             </motion.div>
                         )}
                     </AnimatePresence>
 
-                    {!result && !loading && (
+                    {!imageUrl && !loading && (
                         <div className="text-center py-12 text-gray-400 border-2 border-dashed border-gray-100 rounded-xl">
                             <Sparkles className="w-12 h-12 mx-auto mb-3 text-gray-200" />
                             <p>Enter an idea above to generate a unique AI image</p>
