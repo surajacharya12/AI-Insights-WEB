@@ -60,7 +60,7 @@ export function CourseCard({ course }: CourseCardProps) {
             {/* Course Image */}
             <div className="relative w-full h-48 sm:h-56 md:h-60 lg:h-64">
                 <Image
-                    src={course.bannerImageURL || "/placeholder.jpg"}
+                    src={course.bannerImageURL || "https://placehold.co/600x400"}
                     alt={courseJson?.name || "Course Image"}
                     fill
                     style={{ objectFit: "cover" }}

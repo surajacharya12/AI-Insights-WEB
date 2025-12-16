@@ -35,7 +35,7 @@ export function CourseInfo({
     }
     courseLayout = courseLayout?.course || {};
 
-    const bannerSrc = course.bannerImageURL || '/placeholder-banner.png';
+    const bannerSrc = course.bannerImageURL || 'https://placehold.co/600x400';
 
     /* =====================================================
        GENERATE COURSE CONTENT (YOUR METHOD)
@@ -57,7 +57,7 @@ export function CourseInfo({
             toast.success('Course content generated successfully!');
 
             setTimeout(() => {
-                router.push('/allinsight/dashboard/');
+                router.push('/dashboard/');
             }, 500);
         } catch (e: any) {
             console.error('Error:', e);
