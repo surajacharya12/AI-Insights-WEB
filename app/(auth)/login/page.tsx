@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,8 +15,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import API_URL from "../../api/api_url";
-import { Eye, EyeOff, Mail, Lock, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useUser } from "../../context/UserContext";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
@@ -24,6 +25,38 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
+    const { user, loading: userLoading, setUser } = useUser();
+
+    // Redirect to dashboard if already logged in
+    useEffect(() => {
+        if (!userLoading && user) {
+            router.replace("/dashboard");
+        }
+    }, [user, userLoading, router]);
+
+    // Show loading while checking auth status
+    if (userLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-700">
+                <div className="flex flex-col items-center gap-4">
+                    <Loader2 className="w-10 h-10 text-white animate-spin" />
+                    <p className="text-white/80">Checking login status...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // If user is logged in, show nothing (will redirect)
+    if (user) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-700">
+                <div className="flex flex-col items-center gap-4">
+                    <Loader2 className="w-10 h-10 text-white animate-spin" />
+                    <p className="text-white/80">Redirecting to dashboard...</p>
+                </div>
+            </div>
+        );
+    }
 
     const handleLogin = async () => {
         // Validation
@@ -50,9 +83,6 @@ export default function LoginPage() {
             if (response.ok) {
                 const data = await response.json();
                 console.log("Login successful - Full response:", data);
-                console.log("User ID:", data.id);
-                console.log("User Name:", data.name);
-                console.log("User Email:", data.email);
 
                 // Ensure we have the user ID
                 if (!data.id) {
@@ -61,9 +91,9 @@ export default function LoginPage() {
                     return;
                 }
 
-                // Store user data in localStorage
+                // Store user data in localStorage AND context
                 localStorage.setItem("user", JSON.stringify(data));
-                console.log("User data stored in localStorage:", localStorage.getItem("user"));
+                setUser(data);
 
                 // Show success toast
                 toast.success(`Welcome back, ${data.name || 'User'}!`, {
@@ -71,8 +101,8 @@ export default function LoginPage() {
                     duration: 3000,
                 });
 
-                // Navigate to hero page
-                router.push("/hero");
+                // Navigate to dashboard
+                router.push("/dashboard");
             } else {
                 const errorData = await response.json();
                 console.error("Login failed:", errorData);

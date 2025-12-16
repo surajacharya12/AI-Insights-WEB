@@ -1,28 +1,65 @@
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { AppSidebar } from "../components/app-sidebar";
 import AppNavbar from "../components/app-navbar";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { UserProvider } from "../context/UserContext";
+import { useUser } from "../context/UserContext";
+import { Loader2 } from "lucide-react";
 
 export default function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
-    return (
-        <UserProvider>
-            <SidebarProvider>
-                <div className="flex min-h-screen w-full bg-gray-50">
-                    {/* Sidebar */}
-                    <AppSidebar />
+    const { user, loading } = useUser();
+    const router = useRouter();
 
-                    {/* Main Content Area */}
-                    <div className="flex-1 flex flex-col">
-                        {/* Navbar */}
-                        <AppNavbar />
+    // Redirect to login if not authenticated
+    useEffect(() => {
+        if (!loading && !user) {
+            router.replace("/login");
+        }
+    }, [user, loading, router]);
 
-                        {/* Page Content */}
-                        <main className="flex-1 overflow-auto">
-                            {children}
-                        </main>
-                    </div>
+    // Show loading while checking auth
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <div className="flex flex-col items-center gap-4">
+                    <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
+                    <p className="text-gray-500">Loading...</p>
                 </div>
-            </SidebarProvider>
-        </UserProvider>
+            </div>
+        );
+    }
+
+    // If not logged in, show loading (will redirect)
+    if (!user) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <div className="flex flex-col items-center gap-4">
+                    <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
+                    <p className="text-gray-500">Redirecting to login...</p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <SidebarProvider>
+            <div className="flex min-h-screen w-full bg-gray-50">
+                {/* Sidebar */}
+                <AppSidebar />
+
+                {/* Main Content Area */}
+                <div className="flex-1 flex flex-col">
+                    {/* Navbar */}
+                    <AppNavbar />
+
+                    {/* Page Content */}
+                    <main className="flex-1 overflow-auto">
+                        {children}
+                    </main>
+                </div>
+            </div>
+        </SidebarProvider>
     );
 }

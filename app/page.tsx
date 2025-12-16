@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { Brain, Sparkles, TrendingUp, Users, ArrowRight, GraduationCap } from "lucide-react";
+import { Brain, Sparkles, TrendingUp, Users, ArrowRight, GraduationCap, LayoutDashboard } from "lucide-react";
+import { useUser } from "./context/UserContext";
 
 export default function Home() {
+  const { user, loading } = useUser();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Navigation */}
@@ -15,18 +18,34 @@ export default function Home() {
               <span className="text-2xl font-bold text-white">AI Insight</span>
             </div>
             <div className="flex items-center space-x-4">
-              <Link
-                href="/login"
-                className="text-gray-300 hover:text-white transition-colors px-4 py-2"
-              >
-                Login
-              </Link>
-              <Link
-                href="/signup"
-                className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition-all transform hover:scale-105"
-              >
-                Get Started
-              </Link>
+              {loading ? (
+                <div className="w-24 h-8 bg-slate-700 animate-pulse rounded-lg" />
+              ) : user ? (
+                // Logged in - show Dashboard
+                <Link
+                  href="/dashboard"
+                  className="group bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-2 rounded-lg transition-all transform hover:scale-105 flex items-center space-x-2"
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                  <span>Dashboard</span>
+                </Link>
+              ) : (
+                // Not logged in - show Login/Signup
+                <>
+                  <Link
+                    href="/login"
+                    className="text-gray-300 hover:text-white transition-colors px-4 py-2"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/signup"
+                    className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition-all transform hover:scale-105"
+                  >
+                    Get Started
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

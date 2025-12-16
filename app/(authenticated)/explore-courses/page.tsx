@@ -8,6 +8,8 @@ import { CourseCard } from "../_components/coursecard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUser } from "@/app/context/UserContext";
 import { Toaster } from "sonner";
+import API_URL from "@/app/api/api_url";
+
 
 export default function ExploreCourses() {
     const { user, loading: isUserLoading } = useUser();
@@ -18,7 +20,7 @@ export default function ExploreCourses() {
     const GetCourseList = async (searchTerm = "") => {
         try {
             setIsLoading(true);
-            let url = `${window.location.origin}/api/courses?courseId=0`;
+            let url = `${API_URL}/api/get-courses?courseId=0`;
             if (searchTerm) {
                 url += `&search=${encodeURIComponent(searchTerm)}`;
             }

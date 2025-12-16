@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,9 +15,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Eye, EyeOff, Mail, Lock, User, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Sparkles, Loader2 } from "lucide-react";
 import API_URL from "../../api/api_url";
 import { toast } from "sonner";
+import { useUser } from "../../context/UserContext";
 
 export default function SignupPage() {
     const [name, setName] = useState("");
@@ -27,6 +28,38 @@ export default function SignupPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [agreedToTerms, setAgreedToTerms] = useState(false);
     const router = useRouter();
+    const { user, loading: userLoading } = useUser();
+
+    // Redirect to dashboard if already logged in
+    useEffect(() => {
+        if (!userLoading && user) {
+            router.replace("/dashboard");
+        }
+    }, [user, userLoading, router]);
+
+    // Show loading while checking auth status
+    if (userLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600">
+                <div className="flex flex-col items-center gap-4">
+                    <Loader2 className="w-10 h-10 text-white animate-spin" />
+                    <p className="text-white/80">Checking login status...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // If user is logged in, show loading (will redirect)
+    if (user) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600">
+                <div className="flex flex-col items-center gap-4">
+                    <Loader2 className="w-10 h-10 text-white animate-spin" />
+                    <p className="text-white/80">Redirecting to dashboard...</p>
+                </div>
+            </div>
+        );
+    }
 
     const handleSignup = async () => {
         // Validation

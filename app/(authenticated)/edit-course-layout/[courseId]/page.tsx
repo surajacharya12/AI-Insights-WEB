@@ -12,9 +12,16 @@ interface Course {
     name: string;
 }
 
-export default function EditCoursePage() {
+interface EditCoursePageProps {
+    viewcourse?: boolean;
+    courseId?: string;
+    params?: any;
+    searchParams?: any;
+}
+
+export default function EditCoursePage({ viewcourse = false, courseId: propCourseId }: EditCoursePageProps) {
     const params = useParams();
-    const courseId = params.courseId as string;
+    const courseId = propCourseId || (params?.courseId as string);
 
     const [course, setCourse] = useState<Course | null>(null);
     const [loading, setLoading] = useState(true);
@@ -77,7 +84,7 @@ export default function EditCoursePage() {
 
     return (
         <div className="bg-gray-50 min-h-screen pb-10">
-            <CourseInfo course={course} viewcourse={false} />
+            <CourseInfo course={course} viewcourse={viewcourse} />
             <ChapterTopicList course={course} />
         </div>
     );

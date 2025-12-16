@@ -100,7 +100,7 @@ export function CourseCard({ course }: CourseCardProps) {
                             Start Learning
                         </Button>
                     ) : (
-                        <Link href={`/allinsight/edit-course-layout/${course?.cid}`}>
+                        <Link href={`/edit-course-layout/${course?.cid}`}>
                             <Button
                                 size="sm"
                                 variant="outline"

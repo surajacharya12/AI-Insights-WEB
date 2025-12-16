@@ -71,7 +71,7 @@ export function CourseInfo({
 
     return (
         <div className="py-10 px-6 md:px-10">
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 md:p-12 max-w-7xl mx-auto">
+            <div className="bg-amber-100 rounded-2xl shadow-xl border border-gray-100 p-6 md:p-12 max-w-7xl mx-auto">
                 <div className="flex flex-col md:flex-row gap-10">
                     {/* Text Section */}
                     <div className="flex-1 space-y-6">
