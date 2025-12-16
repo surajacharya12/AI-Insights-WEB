@@ -74,6 +74,20 @@ export default function ThinkBotPage() {
                 errorMsg = error.error;
             }
 
+            if (error && error.details) {
+                try {
+                    const detailsObj = typeof error.details === "string" ? JSON.parse(error.details) : error.details;
+                    if (detailsObj?.error?.message) {
+                        errorMsg = detailsObj.error.message;
+                    }
+                } catch (e) {
+                    // If parsing fails, use the raw string if it's helpful
+                    if (typeof error.details === "string" && error.details.length < 200) {
+                        errorMsg += `: ${error.details}`;
+                    }
+                }
+            }
+
             const errorMessage: ChatMessage = {
                 id: Date.now() + 1,
                 sender: "bot",

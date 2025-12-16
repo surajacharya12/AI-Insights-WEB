@@ -6,6 +6,7 @@ import API_URL from "../../api/api_url";
 import { useUser } from "../../context/UserContext";
 import { AnimatePresence, motion } from "framer-motion";
 import { BrainCircuit, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 import QuizInput from "./components/QuizInput";
 import QuizQuestion from "./components/QuizQuestion";
@@ -73,7 +74,7 @@ const QuizPage = () => {
             setQuiz(quizData);
         } catch (error) {
             console.error("Error generating quiz:", error);
-            alert("Failed to generate quiz. Please try again.");
+            toast.error("Failed to generate quiz. Please try again.");
         } finally {
             setLoading(false);
         }

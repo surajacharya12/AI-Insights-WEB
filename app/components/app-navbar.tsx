@@ -41,7 +41,6 @@ const AppNavbar = () => {
     const navItems = [
         { href: '/hero', label: 'Home', icon: Home },
         { href: '/thinkbot', label: 'ThinkBot', icon: Bot },
-        { href: '/marketplace', label: 'Marketplace', icon: ShoppingCart },
         { href: '/resources', label: 'Resources', icon: FileText },
         { href: '/chatpdf', label: 'ChatPDF', icon: MessageSquare },
     ];

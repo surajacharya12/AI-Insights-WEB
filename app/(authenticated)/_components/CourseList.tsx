@@ -7,6 +7,7 @@ import { AddNewCourseDialog } from "../../components/AddNewCourseDialog";
 import { CourseCard } from "./coursecard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUser } from "../../context/UserContext";
+import { toast } from "sonner";
 import API_URL from "@/app/api/api_url";
 import axios from "axios";
 
@@ -41,6 +42,7 @@ export default function CourseList({ mode = "user" }: CourseListProps) {
                 setCourseList(response.data);
             } catch (error) {
                 console.error("Error fetching courses:", error);
+                toast.error("Failed to fetch courses.");
             } finally {
                 setLoading(false);
             }

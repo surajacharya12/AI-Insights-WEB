@@ -5,6 +5,7 @@ import { EnrollCourseCard } from "./enrollcoursecard";
 import { Skeleton } from "@/components/ui/skeleton";
 import axios from "axios";
 import API_URL from "@/app/api/api_url";
+import { toast } from "sonner";
 
 const URL = API_URL + "/api/enroll?userId=";
 
@@ -25,6 +26,7 @@ export function EnrollCourseList({ userId }: EnrollCourseListProps) {
                 setEnrollCourses(response.data);
             } catch (err) {
                 console.error("Error fetching enrollments:", err);
+                toast.error("Failed to fetch enrolled courses.");
             } finally {
                 setLoading(false);
             }
