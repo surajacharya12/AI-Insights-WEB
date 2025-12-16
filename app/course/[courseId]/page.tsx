@@ -37,44 +37,34 @@ export default function Course() {
   const courseId = params.courseId as string;
   const { user } = useUser();
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [courseInfo, setCourseInfo] = useState<any>(null);
   const [generatedContent, setGeneratedContent] = useState<any>(null);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [enrollmentLoading, setEnrollmentLoading] = useState(true);
 
-  // Fetch Course Info
+  // Fetch Data (Combined)
   useEffect(() => {
     if (!courseId) return;
-    const fetchCourseInfo = async () => {
-      try {
-        setLoading(true);
-        const res = await axios.get(`${API_URL}/api/get-courses?courseId=${courseId}`);
-        setCourseInfo(res.data);
-      } catch (error) {
-        console.error("Error fetching course info:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCourseInfo();
-  }, [courseId]);
 
-  // Fetch Generated Content
-  useEffect(() => {
-    if (!courseId) return;
-    const fetchGeneratedContent = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`${API_URL}/api/generate-course-content?courseId=${courseId}`);
-        setGeneratedContent(res.data);
+        const [courseRes, contentRes] = await Promise.all([
+          axios.get(`${API_URL}/api/get-courses?courseId=${courseId}`),
+          axios.get(`${API_URL}/api/generate-course-content?courseId=${courseId}`)
+        ]);
+
+        setCourseInfo(courseRes.data);
+        setGeneratedContent(contentRes.data);
       } catch (error) {
-        console.error("Error fetching generated content:", error);
+        console.error("Error fetching course data:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchGeneratedContent();
+
+    fetchData();
   }, [courseId]);
 
   // Check enrollment status

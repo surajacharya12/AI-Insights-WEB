@@ -115,12 +115,12 @@ export function EnrollCourseCard({ course, enrollCourse }: EnrollCourseCardProps
                         {courseContent.length || course?.noOfChapters || 0} Chapters
                     </span>
 
-                    <Link href={`/course/${course.cid ?? ""}`}>
+                    <Link href={`/view-course/${course.cid ?? ""}`}>
                         <Button
                             size="sm"
                             className={`flex items-center gap-2 text-white ${isComplete
-                                    ? 'bg-green-600 hover:bg-green-700'
-                                    : 'bg-indigo-600 hover:bg-indigo-700'
+                                ? 'bg-green-600 hover:bg-green-700'
+                                : 'bg-indigo-600 hover:bg-indigo-700'
                                 }`}
                         >
                             <PlayCircle className="w-4 h-4" />

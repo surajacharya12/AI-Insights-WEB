@@ -28,11 +28,11 @@ export default function CourseAccordion({
     const [savingTopic, setSavingTopic] = useState<string | null>(null);
 
     const totalTopics = chapters.reduce((acc, ch) => acc + (ch.topics?.length || 0), 0);
-    const totalVideos = chapters.reduce(
+    const totalVideos = chapters?.reduce(
         (acc, ch) =>
-            acc + ch.topics.reduce((tAcc, t) => tAcc + (t.youtubeVideos?.length || 0), 0),
+            acc + (ch.topics?.reduce((tAcc, t) => tAcc + (t.youtubeVideos?.length || 0), 0) || 0),
         0
-    );
+    ) || 0;
     const completedCount = Object.keys(completedTopics).length;
     const progressPercent = totalTopics > 0 ? Math.round((completedCount / totalTopics) * 100) : 0;
 

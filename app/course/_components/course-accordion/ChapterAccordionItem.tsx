@@ -37,10 +37,10 @@ export default function ChapterAccordionItem({
     isEnrolled,
     chapterProgress,
 }: ChapterAccordionItemProps) {
-    const videoCount = chapter.topics.reduce(
+    const videoCount = chapter.topics?.reduce(
         (acc, t) => acc + (t.youtubeVideos?.length || 0),
         0
-    );
+    ) || 0;
 
     const isChapterComplete = chapterProgress.completed === chapterProgress.total && chapterProgress.total > 0;
 
