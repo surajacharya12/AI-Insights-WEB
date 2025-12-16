@@ -4,20 +4,26 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import API_URL from "../../api/api_url";
-import { Eye, EyeOff, Mail, Lock, Sparkles, Loader2 } from "lucide-react";
+import {
+    Eye,
+    EyeOff,
+    Mail,
+    Lock,
+    Sparkles,
+    Loader2,
+    GraduationCap,
+    Brain,
+    Zap,
+    BookOpen,
+    ArrowRight,
+    CheckCircle2
+} from "lucide-react";
 import { toast } from "sonner";
 import { useUser } from "../../context/UserContext";
+import { motion } from "framer-motion";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
@@ -37,29 +43,39 @@ export default function LoginPage() {
     // Show loading while checking auth status
     if (userLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-700">
-                <div className="flex flex-col items-center gap-4">
-                    <Loader2 className="w-10 h-10 text-white animate-spin" />
-                    <p className="text-white/80">Checking login status...</p>
-                </div>
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-950 via-purple-900 to-violet-950">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex flex-col items-center gap-4"
+                >
+                    <div className="relative">
+                        <div className="w-16 h-16 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 animate-pulse" />
+                        <Loader2 className="w-8 h-8 text-white absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-spin" />
+                    </div>
+                    <p className="text-white/80 font-medium">Checking login status...</p>
+                </motion.div>
             </div>
         );
     }
 
-    // If user is logged in, show nothing (will redirect)
+    // If user is logged in, show redirect message
     if (user) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-700">
-                <div className="flex flex-col items-center gap-4">
-                    <Loader2 className="w-10 h-10 text-white animate-spin" />
-                    <p className="text-white/80">Redirecting to dashboard...</p>
-                </div>
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-950 via-purple-900 to-violet-950">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex flex-col items-center gap-4"
+                >
+                    <CheckCircle2 className="w-16 h-16 text-green-400" />
+                    <p className="text-white/80 font-medium">Redirecting to dashboard...</p>
+                </motion.div>
             </div>
         );
     }
 
     const handleLogin = async () => {
-        // Validation
         if (!email || !password) {
             toast.error("Please fill in all fields");
             return;
@@ -74,174 +90,253 @@ export default function LoginPage() {
         try {
             const response = await fetch(`${API_URL}/user/login`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, password }),
             });
 
             if (response.ok) {
                 const data = await response.json();
-                console.log("Login successful - Full response:", data);
 
-                // Ensure we have the user ID
                 if (!data.id) {
-                    console.error("WARNING: No user ID in response!");
-                    toast.error("Login error: User ID not received from server");
+                    toast.error("Login error: User ID not received");
                     return;
                 }
 
-                // Store user data in localStorage AND context
                 localStorage.setItem("user", JSON.stringify(data));
                 setUser(data);
 
-                // Show success toast
                 toast.success(`Welcome back, ${data.name || 'User'}!`, {
-                    description: "You have successfully logged in",
-                    duration: 3000,
+                    description: "Redirecting to dashboard...",
+                    duration: 2000,
                 });
 
-                // Navigate to dashboard
                 router.push("/dashboard");
             } else {
                 const errorData = await response.json();
-                console.error("Login failed:", errorData);
                 toast.error("Login Failed", {
-                    description: errorData.error || "Please check your credentials and try again",
+                    description: errorData.error || "Please check your credentials",
                 });
             }
         } catch (error) {
-            console.error("An error occurred:", error);
+            console.error(error);
             toast.error("Connection Error", {
-                description: "Unable to connect to server. Please try again.",
+                description: "Unable to connect to server",
             });
         } finally {
             setLoading(false);
         }
     };
 
+    const handleKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === "Enter") {
+            handleLogin();
+        }
+    };
+
+    const features = [
+        { icon: Brain, text: "AI-Powered Learning" },
+        { icon: BookOpen, text: "Custom Course Generation" },
+        { icon: Zap, text: "Interactive Quizzes" },
+    ];
+
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-700 p-4 relative overflow-hidden">
-            {/* Animated background elements */}
-            <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-                <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+        <div className="min-h-screen w-full flex">
+            {/* Left Side - Branding (Hidden on mobile) */}
+            <div className="hidden lg:flex lg:w-1/2 xl:w-3/5 relative bg-gradient-to-br from-indigo-950 via-purple-900 to-violet-950 overflow-hidden">
+                {/* Animated background elements */}
+                <div className="absolute inset-0">
+                    <div className="absolute top-20 left-20 w-72 h-72 bg-purple-500/30 rounded-full blur-3xl animate-pulse" />
+                    <div className="absolute bottom-20 right-20 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-pink-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "2s" }} />
+                </div>
+
+                {/* Grid pattern overlay */}
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:4rem_4rem]" />
+
+                {/* Content */}
+                <div className="relative z-10 flex flex-col justify-center px-12 xl:px-20">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6 }}
+                    >
+                        {/* Logo */}
+                        <div className="flex items-center gap-3 mb-12">
+                            <div className="p-3 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-lg shadow-purple-500/30">
+                                <GraduationCap className="w-10 h-10 text-white" />
+                            </div>
+                            <span className="text-4xl font-black text-white">AI Insight</span>
+                        </div>
+
+                        {/* Heading */}
+                        <h1 className="text-5xl xl:text-6xl font-black text-white leading-tight mb-6">
+                            Welcome back to<br />
+                            <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                                your learning journey
+                            </span>
+                        </h1>
+
+                        <p className="text-xl text-white/60 mb-12 max-w-lg">
+                            Continue exploring AI-generated courses, take quizzes, and track your progress towards mastery.
+                        </p>
+
+                        {/* Features */}
+                        <div className="space-y-4">
+                            {features.map((feature, index) => (
+                                <motion.div
+                                    key={index}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.3 + index * 0.1 }}
+                                    className="flex items-center gap-4"
+                                >
+                                    <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm">
+                                        <feature.icon className="w-5 h-5 text-purple-300" />
+                                    </div>
+                                    <span className="text-white/80 font-medium">{feature.text}</span>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </motion.div>
+                </div>
+
+                {/* Decorative elements */}
+                <div className="absolute bottom-10 left-10 flex items-center gap-2 text-white/40 text-sm">
+                    <Sparkles className="w-4 h-4" />
+                    <span>Powered by Advanced AI</span>
+                </div>
             </div>
 
-            <style jsx>{`
-                @keyframes blob {
-                    0%, 100% {
-                        transform: translate(0, 0) scale(1);
-                    }
-                    33% {
-                        transform: translate(30px, -50px) scale(1.1);
-                    }
-                    66% {
-                        transform: translate(-20px, 20px) scale(0.9);
-                    }
-                }
-                .animate-blob {
-                    animation: blob 7s infinite;
-                }
-                .animation-delay-2000 {
-                    animation-delay: 2s;
-                }
-                .animation-delay-4000 {
-                    animation-delay: 4s;
-                }
-            `}</style>
-
-            <Card className="w-full max-w-md shadow-2xl rounded-3xl overflow-hidden backdrop-blur-sm bg-white/95 relative z-10 transform transition-all duration-300 hover:scale-[1.02]">
-                <CardHeader className="bg-gradient-to-r from-purple-600 to-indigo-600 p-8 text-white">
-                    <div className="flex items-center justify-center mb-4">
-                        <div className="bg-white/20 p-3 rounded-full backdrop-blur-sm">
-                            <Sparkles className="w-8 h-8" />
+            {/* Right Side - Login Form */}
+            <div className="w-full lg:w-1/2 xl:w-2/5 flex items-center justify-center p-6 sm:p-8 lg:p-12 bg-gray-50 dark:bg-gray-900">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                    className="w-full max-w-md"
+                >
+                    {/* Mobile Logo */}
+                    <div className="lg:hidden flex items-center justify-center gap-3 mb-8">
+                        <div className="p-2.5 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg">
+                            <GraduationCap className="w-7 h-7 text-white" />
                         </div>
-                    </div>
-                    <CardTitle className="text-3xl font-extrabold text-center">Welcome Back</CardTitle>
-                    <CardDescription className="text-center text-purple-100 mt-2">
-                        Sign in to continue your journey
-                    </CardDescription>
-                </CardHeader>
-
-                <CardContent className="space-y-6 p-8">
-                    <div className="space-y-2">
-                        <Label htmlFor="email" className="text-gray-700 font-medium">Email</Label>
-                        <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                            <Input
-                                id="email"
-                                type="email"
-                                placeholder="you@example.com"
-                                className="pl-10 h-12 border-2 border-gray-200 focus:border-purple-500 transition-all rounded-xl"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                            />
-                        </div>
+                        <span className="text-2xl font-bold text-gray-900 dark:text-white">AI Insight</span>
                     </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="password" className="text-gray-700 font-medium">Password</Label>
-                        <div className="relative">
-                            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                            <Input
-                                id="password"
-                                type={showPassword ? "text" : "password"}
-                                placeholder="Enter your password"
-                                className="pl-10 pr-12 h-12 border-2 border-gray-200 focus:border-purple-500 transition-all rounded-xl"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                            />
-                            <button
-                                type="button"
-                                onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-purple-600 transition-colors"
-                            >
-                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                            </button>
-                        </div>
+                    {/* Form Header */}
+                    <div className="text-center lg:text-left mb-8">
+                        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                            Sign in
+                        </h2>
+                        <p className="text-gray-500 dark:text-gray-400">
+                            Enter your credentials to access your account
+                        </p>
                     </div>
 
-                    <div className="flex justify-end">
-                        <Link href="/forgot-password" className="text-sm text-purple-600 hover:text-purple-700 font-medium hover:underline transition-colors">
-                            Forgot password?
-                        </Link>
-                    </div>
-                </CardContent>
-
-                <CardFooter className="flex flex-col gap-4 p-8 pt-0">
-                    <Button
-                        className="w-full h-12 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform transition-all duration-200 hover:scale-[1.02]"
-                        onClick={handleLogin}
-                        disabled={loading}
-                    >
-                        {loading ? (
-                            <div className="flex items-center gap-2">
-                                <div className="animate-spin border-2 border-white border-t-transparent rounded-full w-5 h-5"></div>
-                                <span>Signing In...</span>
+                    {/* Form */}
+                    <div className="space-y-5">
+                        <div className="space-y-2">
+                            <Label htmlFor="email" className="text-gray-700 dark:text-gray-300 font-medium">
+                                Email Address
+                            </Label>
+                            <div className="relative">
+                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    placeholder="you@example.com"
+                                    className="pl-12 h-14 text-base bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    onKeyPress={handleKeyPress}
+                                />
                             </div>
-                        ) : (
-                            "Sign In"
-                        )}
-                    </Button>
+                        </div>
 
-                    <div className="relative">
+                        <div className="space-y-2">
+                            <Label htmlFor="password" className="text-gray-700 dark:text-gray-300 font-medium">
+                                Password
+                            </Label>
+                            <div className="relative">
+                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                <Input
+                                    id="password"
+                                    type={showPassword ? "text" : "password"}
+                                    placeholder="Enter your password"
+                                    className="pl-12 pr-12 h-14 text-base bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    onKeyPress={handleKeyPress}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600 transition-colors"
+                                >
+                                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end">
+                            <Link
+                                href="/forgot-password"
+                                className="text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors"
+                            >
+                                Forgot password?
+                            </Link>
+                        </div>
+
+                        <Button
+                            onClick={handleLogin}
+                            disabled={loading}
+                            className="w-full h-14 text-base font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/40 transition-all transform hover:scale-[1.02] disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                        >
+                            {loading ? (
+                                <div className="flex items-center gap-3">
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    <span>Signing in...</span>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-2">
+                                    <span>Sign In</span>
+                                    <ArrowRight className="w-5 h-5" />
+                                </div>
+                            )}
+                        </Button>
+                    </div>
+
+                    {/* Divider */}
+                    <div className="relative my-8">
                         <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-gray-300"></div>
+                            <div className="w-full border-t border-gray-200 dark:border-gray-700" />
                         </div>
                         <div className="relative flex justify-center text-sm">
-                            <span className="px-2 bg-white text-gray-500">New to AI Insight?</span>
+                            <span className="px-4 bg-gray-50 dark:bg-gray-900 text-gray-500">
+                                New to AI Insight?
+                            </span>
                         </div>
                     </div>
 
-                    <Link href="/signup" className="text-center">
-                        <Button variant="outline" className="w-full h-12 border-2 border-purple-600 text-purple-600 hover:bg-purple-50 font-semibold rounded-xl transition-all">
-                            Create Account
+                    {/* Sign Up Link */}
+                    <Link href="/signup">
+                        <Button
+                            variant="outline"
+                            className="w-full h-14 text-base font-semibold border-2 border-gray-200 dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-500 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-xl transition-all"
+                        >
+                            Create an account
                         </Button>
                     </Link>
-                </CardFooter>
-            </Card>
+
+                    {/* Footer */}
+                    <p className="text-center text-sm text-gray-500 mt-8">
+                        By signing in, you agree to our{" "}
+                        <Link href="/terms" className="text-indigo-600 hover:underline">Terms</Link>
+                        {" "}and{" "}
+                        <Link href="/privacy" className="text-indigo-600 hover:underline">Privacy Policy</Link>
+                    </p>
+                </motion.div>
+            </div>
         </div>
     );
 }
