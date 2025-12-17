@@ -22,3 +22,19 @@ export const checkGrammar = async (text: string) => {
         throw error;
     }
 };
+
+
+export const imageToText = async (
+    imageBase64: string,
+    options?: {
+        extract?: "all" | "text-only" | "tables" | "code";
+        format?: "markdown" | "plain";
+    }
+) => {
+    const response = await axios.post(`${BASE_URL}/image-to-text`, {
+        imageBase64,
+        options,
+    });
+
+    return response.data;
+};
