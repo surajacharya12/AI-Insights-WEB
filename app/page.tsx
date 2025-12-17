@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Brain, Sparkles, TrendingUp, Users, ArrowRight, GraduationCap, LayoutDashboard } from "lucide-react";
 import { useUser } from "./context/UserContext";
 
+
 export default function Home() {
   const { user, loading } = useUser();
 
@@ -143,12 +144,8 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-800 py-8 px-4">
-        <div className="max-w-7xl mx-auto text-center text-gray-400">
-          <p>&copy; 2024 AI Insight. All rights reserved.</p>
-        </div>
-      </footer>
+
+
     </div>
   );
 }

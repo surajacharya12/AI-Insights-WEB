@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AppSidebar } from "../components/app-sidebar";
 import AppNavbar from "../components/app-navbar";
+
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { useUser } from "../context/UserContext";
 import { Loader2 } from "lucide-react";
@@ -45,20 +46,26 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
 
     return (
         <SidebarProvider>
-            <div className="flex min-h-screen w-full bg-gray-50">
-                {/* Sidebar */}
-                <AppSidebar />
+            <div className="flex flex-col min-h-screen w-full bg-gray-50">
+                <div className="relative flex flex-1">
+                    {/* Sidebar */}
+                    <AppSidebar />
 
-                {/* Main Content Area */}
-                <div className="flex-1 flex flex-col">
-                    {/* Navbar */}
-                    <AppNavbar />
+                    {/* Main Content Area */}
+                    <div className="flex-1 flex flex-col min-w-0">
+                        {/* Navbar */}
+                        <AppNavbar />
 
-                    {/* Page Content */}
-                    <main className="flex-1 overflow-auto">
-                        {children}
-                    </main>
+                        {/* Page Content */}
+                        <main className="flex-1 flex flex-col">
+                            <div className="flex-1 w-full">
+                                {children}
+                            </div>
+                        </main>
+                    </div>
                 </div>
+
+
             </div>
         </SidebarProvider>
     );

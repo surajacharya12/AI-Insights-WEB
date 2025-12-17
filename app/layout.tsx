@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import { UserProvider } from "./context/UserContext";
 
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -30,7 +31,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <UserProvider>
-          {children}
+          <div className="flex min-h-screen flex-col">
+            <main className="flex-1">{children}</main>
+          </div>
           <Toaster position="top-right" richColors />
         </UserProvider>
       </body>

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import {
     BookOpen,
     Settings,
@@ -31,6 +32,11 @@ import {
     Compass,
     BrainCircuit,
     Plus,
+    Github,
+    Instagram,
+    Linkedin,
+    Facebook,
+    Twitter,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AddNewCourseDialog } from "./AddNewCourseDialog";
@@ -50,6 +56,14 @@ const sidebarItems = [
 // Tools section
 const toolItems = [
     { icon: Settings, label: "Settings", path: "/settings" },
+];
+
+const socialLinks = [
+    { icon: Github, url: "https://github.com/surajacharya12", label: "GitHub" },
+    { icon: Instagram, url: "https://www.instagram.com/suraj_acharyaa10/", label: "Instagram" },
+    { icon: Linkedin, url: "https://www.linkedin.com/in/surajacharyaa/", label: "LinkedIn" },
+    { icon: Facebook, url: "https://www.facebook.com/auraj.acharya/", label: "Facebook" },
+    { icon: Twitter, url: "https://x.com/SURAJAC22891334", label: "Twitter" },
 ];
 
 export function AppSidebar() {
@@ -172,6 +186,45 @@ export function AppSidebar() {
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
+
+                <SidebarGroup className="mt-6">
+                    <SidebarGroupLabel className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-2">
+                        About Developer
+                    </SidebarGroupLabel>
+                    <SidebarGroupContent>
+                        <div className="px-3 py-4 bg-gradient-to-br from-green-50/50 to-blue-50/50 rounded-xl border border-green-100/50 mx-2 shadow-sm">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="h-10 w-10 shrink-0 rounded-full bg-white flex items-center justify-center shadow-md ring-2 ring-white overflow-hidden">
+                                    <Image
+                                        src="/assets/logo.webp"
+                                        alt="Suraj Acharya"
+                                        width={60}
+                                        height={60}
+                                        className="h-full w-full object-cover"
+                                    />
+                                </div>
+                                <div className="min-w-0">
+                                    <p className="text-sm font-bold text-gray-800 truncate">Suraj Acharya</p>
+                                    <p className="text-[10px] text-green-600 font-semibold uppercase tracking-wide truncate">Full Stack Developer</p>
+                                </div>
+                            </div>
+                            <div className="flex gap-1.5 flex-wrap justify-center">
+                                {socialLinks.map((item) => (
+                                    <Link
+                                        key={item.label}
+                                        href={item.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="p-2 rounded-lg bg-white border border-gray-100 text-gray-500 hover:text-green-600 hover:border-green-200 hover:shadow-sm transition-all duration-200 hover:scale-110"
+                                        title={item.label}
+                                    >
+                                        <item.icon className="h-4 w-4" />
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+                    </SidebarGroupContent>
+                </SidebarGroup>
             </SidebarContent>
 
             <SidebarFooter className="border-t border-gray-200 p-4 bg-gradient-to-r from-red-50 to-orange-50">
@@ -191,6 +244,6 @@ export function AppSidebar() {
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarFooter>
-        </Sidebar>
+        </Sidebar >
     );
 }
