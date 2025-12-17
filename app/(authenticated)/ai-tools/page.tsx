@@ -54,7 +54,7 @@ export default function AIToolsPage() {
                         </TabsTrigger>
 
                         <TabsTrigger value="text-gen" className="flex gap-2">
-                            <Type className="w-4 h-4" /> Text Generation
+                            <Type className="w-4 h-4" /> Image to Text Generation
                         </TabsTrigger>
                     </TabsList>
 
