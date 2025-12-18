@@ -9,11 +9,13 @@ interface VideoSectionProps {
     videos: YouTubeVideo[];
 }
 
-const INITIAL_COUNT = 6;
+
 
 export default function VideoSection({ videos }: VideoSectionProps) {
     const [selectedVideo, setSelectedVideo] = useState<YouTubeVideo | null>(null);
-    const [expanded, setExpanded] = useState(false);
+    const [isAutoplayEnabled, setIsAutoplayEnabled] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const PAGE_SIZE = 3;
 
     useEffect(() => {
         if (!selectedVideo && videos.length) {
@@ -23,9 +25,14 @@ export default function VideoSection({ videos }: VideoSectionProps) {
 
     if (!videos || videos.length === 0) return null;
 
-    const visibleVideos = expanded
-        ? videos
-        : videos.slice(0, INITIAL_COUNT);
+    const totalPages = Math.ceil(videos.length / PAGE_SIZE);
+    const startIndex = (currentPage - 1) * PAGE_SIZE;
+    const visibleVideos = videos.slice(startIndex, startIndex + PAGE_SIZE);
+
+    const goToPage = (page: number) => {
+        setCurrentPage(page);
+        // Scroll to the top of the video grid/header if needed
+    };
 
     return (
         <motion.div
@@ -71,7 +78,7 @@ export default function VideoSection({ videos }: VideoSectionProps) {
                                     <div className="aspect-video">
                                         <iframe
                                             className="absolute inset-0 h-full w-full"
-                                            src={`https://www.youtube.com/embed/${selectedVideo.videoId}?autoplay=1&rel=0`}
+                                            src={`https://www.youtube.com/embed/${selectedVideo.videoId}?autoplay=${isAutoplayEnabled ? 1 : 0}&rel=0`}
                                             title={selectedVideo.title}
                                             loading="lazy"
                                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -110,7 +117,10 @@ export default function VideoSection({ videos }: VideoSectionProps) {
                     {visibleVideos.map((video, vIndex) => (
                         <motion.button
                             key={video.videoId}
-                            onClick={() => setSelectedVideo(video)}
+                            onClick={() => {
+                                setSelectedVideo(video);
+                                setIsAutoplayEnabled(true);
+                            }}
                             initial={{ opacity: 0, y: 15 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.3, delay: vIndex * 0.05 }}
@@ -168,28 +178,48 @@ export default function VideoSection({ videos }: VideoSectionProps) {
                         </motion.button>
                     ))}
                 </motion.div>
-
-                {/* Fade overlay when collapsed */}
-                {!expanded && videos.length > INITIAL_COUNT && (
-                    <div className="pointer-events-none absolute bottom-0 left-0 h-24 w-full bg-gradient-to-t from-white to-transparent" />
-                )}
             </div>
 
-            {/* ================= See More ================= */}
-            {videos.length > INITIAL_COUNT && (
-                <div className="flex justify-center pt-4">
-                    <button
-                        onClick={() => setExpanded((prev) => !prev)}
-                        className="group inline-flex items-center gap-2 rounded-full border border-gray-200 px-6 py-2 text-sm font-semibold text-gray-700 transition hover:border-indigo-300 hover:bg-gray-100"
-                    >
-                        {expanded ? "Show less" : "See more"}
-                        <motion.span
-                            animate={{ rotate: expanded ? 180 : 0 }}
-                            transition={{ duration: 0.2 }}
+            {/* ================= Pagination ================= */}
+            {totalPages > 1 && (
+                <div className="flex flex-col items-center gap-4 pt-8">
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => goToPage(Math.max(1, currentPage - 1))}
+                            disabled={currentPage === 1}
+                            className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition-all hover:border-indigo-300 hover:bg-indigo-50 disabled:opacity-50 disabled:hover:bg-white disabled:hover:border-gray-200"
                         >
-                            <ChevronDown className="h-4 w-4" />
-                        </motion.span>
-                    </button>
+                            <ChevronDown className="h-5 w-5 rotate-90" />
+                        </button>
+
+                        <div className="flex items-center gap-1.5 px-2">
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                                <button
+                                    key={page}
+                                    onClick={() => goToPage(page)}
+                                    className={`flex h-10 w-10 items-center justify-center rounded-xl font-bold transition-all duration-300
+                                        ${currentPage === page
+                                            ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200 scale-110"
+                                            : "text-gray-500 hover:bg-gray-100 hover:text-indigo-600"
+                                        }`}
+                                >
+                                    {page}
+                                </button>
+                            ))}
+                        </div>
+
+                        <button
+                            onClick={() => goToPage(Math.min(totalPages, currentPage + 1))}
+                            disabled={currentPage === totalPages}
+                            className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition-all hover:border-indigo-300 hover:bg-indigo-50 disabled:opacity-50 disabled:hover:bg-white disabled:hover:border-gray-200"
+                        >
+                            <ChevronDown className="h-5 w-5 -rotate-90" />
+                        </button>
+                    </div>
+
+                    <p className="text-xs font-medium text-gray-400">
+                        Showing {startIndex + 1} to {Math.min(startIndex + PAGE_SIZE, videos.length)} of {videos.length} videos
+                    </p>
                 </div>
             )}
         </motion.div>

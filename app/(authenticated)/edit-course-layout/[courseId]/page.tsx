@@ -24,23 +24,46 @@ export default function EditCoursePage() {
 
         const fetchCourse = async () => {
             try {
+                console.log(`Fetching course from: ${API_URL}/api/get-courses?courseId=${courseId}`);
+
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const result = await axios.get<any>(`${API_URL}/api/get-courses?courseId=${courseId}`);
+                const result = await axios.get<any>(`${API_URL}/api/get-courses?courseId=${courseId}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    validateStatus: (status) => status < 500, // Don't throw on 4xx errors
+                });
 
-                if (!result.data) {
+                console.log("API Response:", result);
 
-                    toast.error("Course not found.");
-                    throw new Error("Course not found");
+                if (!result.data || result.status >= 400) {
+                    const errorMsg = result.data?.error || "Course not found.";
+                    toast.error(errorMsg);
+                    throw new Error(errorMsg);
                 }
 
                 setCourse(result.data);
             } catch (error) {
                 console.error("Error fetching course:", error);
 
+                // Check if it's an axios error
+                if (axios.isAxiosError(error)) {
+                    console.error("Axios error details:", {
+                        message: error.message,
+                        response: error.response?.data,
+                        status: error.response?.status,
+                    });
+
+                    if (error.message.includes("JSON")) {
+                        toast.error("Server returned invalid response. Please check if the backend is running.");
+                    } else {
+                        toast.error(error.response?.data?.error || "Failed to load course details.");
+                    }
+                } else {
+                    toast.error("Failed to load course details.");
+                }
 
                 notFound();
-
-                toast.error("Failed to load course details.");
             } finally {
                 setLoading(false);
             }
