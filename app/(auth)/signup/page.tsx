@@ -18,7 +18,6 @@ import {
     GraduationCap,
     Brain,
     Zap,
-    BookOpen,
     ArrowRight,
     CheckCircle2,
     Rocket,
@@ -340,7 +339,7 @@ export default function SignupPage() {
                                     </div>
                                     <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Verify your email</h3>
                                     <p className="text-sm text-gray-500 mt-2">
-                                        We've sent a 6-digit code to <span className="font-medium text-gray-900 dark:text-white">{email}</span>
+                                        We&apos;ve sent a 6-digit code to <span className="font-medium text-gray-900 dark:text-white">{email}</span>
                                     </p>
                                 </div>
 

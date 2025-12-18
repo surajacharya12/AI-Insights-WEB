@@ -12,12 +12,7 @@ interface Course {
     name: string;
 }
 
-interface EditCoursePageProps {
-    params: Promise<{ courseId: string }>;
-    searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
-}
-
-export default function EditCoursePage({ params }: EditCoursePageProps) {
+export default function EditCoursePage() {
     const routeParams = useParams();
     const courseId = routeParams?.courseId as string;
 
