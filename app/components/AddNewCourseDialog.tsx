@@ -133,12 +133,12 @@ export function AddNewCourseDialog({ children }: AddNewCourseDialogProps) {
     return (
         <Dialog>
             <DialogTrigger asChild>{children}</DialogTrigger>
-            <DialogContent className="max-w-2xl rounded-3xl shadow-2xl border-0 bg-white/95 backdrop-blur-xl p-0 overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" />
+            <DialogContent className="max-w-2xl max-h-[90vh] md:max-h-[85vh] flex flex-col rounded-3xl shadow-2xl border-0 bg-white/95 backdrop-blur-xl p-0 overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 z-50" />
 
-                <DialogHeader className="p-8 pb-0">
+                <DialogHeader className="p-8 pb-4 flex-shrink-0 border-b border-gray-100/50">
                     <DialogTitle className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                        <div className="p-3 bg-indigo-100 rounded-xl">
+                        <div className="p-3 bg-indigo-100 rounded-xl shadow-inner">
                             <Sparkles className="w-6 h-6 text-indigo-600" />
                         </div>
                         Create New Course
@@ -148,7 +148,7 @@ export function AddNewCourseDialog({ children }: AddNewCourseDialogProps) {
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="p-8 pt-6">
+                <div className="p-8 pt-6 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent hover:scrollbar-thumb-gray-300 transition-colors">
                     {userLoading ? (
                         <div className="flex flex-col items-center justify-center py-12 space-y-4">
                             <Loader2 className="w-10 h-10 animate-spin text-indigo-600" />
