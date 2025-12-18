@@ -2,21 +2,18 @@
 
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useParams, notFound } from 'next/navigation'; // <-- Import notFound here
+import { useParams, notFound } from 'next/navigation';
 import { CourseInfo } from '../../_components/courseinfo';
 import { ChapterTopicList } from '../../_components/chapterTopicList';
 import { toast } from 'sonner';
 import API_URL from '@/app/api/api_url';
-interface Course {
-    id: string;
-    name: string;
-}
 
 export default function EditCoursePage() {
     const routeParams = useParams();
     const courseId = routeParams?.courseId as string;
 
-    const [course, setCourse] = useState<Course | null>(null);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [course, setCourse] = useState<any | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -27,8 +24,8 @@ export default function EditCoursePage() {
 
         const fetchCourse = async () => {
             try {
-
-                const result = await axios.get<Course>(`${API_URL}/api/get-courses?courseId=${courseId}`);
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const result = await axios.get<any>(`${API_URL}/api/get-courses?courseId=${courseId}`);
 
                 if (!result.data) {
 

@@ -8,16 +8,12 @@ import { ChapterTopicList } from '../../_components/chapterTopicList';
 import { toast } from 'sonner';
 import API_URL from '@/app/api/api_url';
 
-interface Course {
-    id: string;
-    name: string;
-}
-
 export default function ViewCoursePage() {
     const params = useParams();
     const courseId = params?.courseid as string;
 
-    const [course, setCourse] = useState<Course | null>(null);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [course, setCourse] = useState<any | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -28,7 +24,8 @@ export default function ViewCoursePage() {
 
         const fetchCourse = async () => {
             try {
-                const result = await axios.get<Course>(`${API_URL}/api/get-courses?courseId=${courseId}`);
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const result = await axios.get<any>(`${API_URL}/api/get-courses?courseId=${courseId}`);
 
                 if (!result.data) {
                     toast.error("Course not found.");
