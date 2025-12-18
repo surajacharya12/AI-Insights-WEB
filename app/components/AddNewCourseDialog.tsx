@@ -77,6 +77,11 @@ export function AddNewCourseDialog({ children }: AddNewCourseDialogProps) {
             return;
         }
 
+        if (chaptersNumber > 6) {
+            toast.error("Maximum 6 chapters are allowed.");
+            return;
+        }
+
         onGenerate();
     };
 
@@ -236,16 +241,21 @@ export function AddNewCourseDialog({ children }: AddNewCourseDialogProps) {
 
                                 {/* Chapters */}
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                                        <Layers className="w-4 h-4 text-gray-400" /> No. of Chapters
+                                    <label className="text-sm font-medium text-gray-700 flex items-center justify-between gap-2">
+                                        <span className="flex items-center gap-2">
+                                            <Layers className="w-4 h-4 text-gray-400" /> No. of Chapters
+                                        </span>
+                                        <span className="text-[10px] font-bold text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">MAX 6</span>
                                     </label>
                                     <Input
                                         type="number"
-                                        placeholder="e.g. 5"
+                                        placeholder="e.g. 5 (Max 6)"
                                         value={formData.chapters}
                                         onChange={(e) => onHandleInputChange("chapters", e.target.value)}
                                         className="rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 h-11 transition-all hover:border-indigo-300"
                                         disabled={loading}
+                                        min={1}
+                                        max={6}
                                     />
                                 </div>
 
