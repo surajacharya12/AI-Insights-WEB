@@ -2,13 +2,12 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useUser } from "../../context/UserContext";
-import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
-import { getThinkBotResponse } from "../../api/thinkbotApi";
 import Sidebar from "./components/Sidebar";
 import ChatMessages from "./components/ChatMessages";
 import WelcomeBanner from "./components/WelcomeBanner";
 import ChatInput from "./components/ChatInput";
+import { getThinkBotResponse } from "../../api/thinkbotApi";
 import {
   getAllSessions,
   saveSession,
@@ -23,67 +22,40 @@ import {
 export default function ThinkBotPage() {
   const { user, loading } = useUser();
   const [sessions, setSessions] = useState<ChatSession[]>([]);
-  const [currentSessionId, setCurrentSessionId] = useState<string>("");
+  const [currentSessionId, setCurrentSessionId] = useState("");
   const [input, setInput] = useState("");
   const [botTyping, setBotTyping] = useState(false);
   const [initialized, setInitialized] = useState(false);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageIdCounter = useRef(0);
 
   const currentSession = sessions.find((s) => s.id === currentSessionId);
   const messages = currentSession?.messages || [];
 
-  // Initialize from storage on mount
+  /* -------------------------------- INIT -------------------------------- */
+
   useEffect(() => {
     const savedSessions = getAllSessions();
     setSessions(savedSessions);
 
     if (savedSessions.length > 0) {
       setCurrentSessionId(savedSessions[0].id);
-      const maxId = savedSessions[0].messages.reduce((max, msg) => {
-        const idNum = parseInt(msg.id.split("-")[1] || "0");
-        return Math.max(max, idNum);
-      }, 0);
-      messageIdCounter.current = maxId;
+      messageIdCounter.current = savedSessions[0].messages.length;
     } else {
-      // Create a new session if none exist
-      const newSession: ChatSession = {
-        id: Date.now().toString(),
-        title: "New Chat",
-        messages: [],
-        createdAt: Date.now(),
-        expiresAt: Date.now() + SESSION_DURATION_DAYS * 24 * 60 * 60 * 1000,
-      };
-      setSessions([newSession]);
-      setCurrentSessionId(newSession.id);
+      handleNewChat();
     }
 
     setInitialized(true);
   }, []);
 
-  // Save current session whenever messages change
-  useEffect(() => {
-    if (initialized && currentSessionId) {
-      const session = sessions.find((s) => s.id === currentSessionId);
-      if (session) {
-        const updatedSession: ChatSession = {
-          ...session,
-          messages,
-          title: generateSessionTitle(messages),
-        };
-        saveSession(updatedSession);
-        setSessions((prev) =>
-          prev.map((s) => (s.id === updatedSession.id ? updatedSession : s)),
-        );
-      }
-    }
-  }, [messages, initialized, currentSessionId]);
+  /* ---------------------------- AUTO SCROLL ---------------------------- */
 
-  // Scroll to bottom
-  const scrollToBottom = () => {
+  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-  useEffect(scrollToBottom, [messages, botTyping]);
+  }, [messages, botTyping]);
+
+  /* --------------------------- FIXED HANDLE SEND -------------------------- */
 
   const handleSend = async () => {
     if (!input.trim() || !currentSession) return;
@@ -95,24 +67,35 @@ export default function ThinkBotPage() {
       timestamp: new Date().toISOString(),
     };
 
-    const updatedMessages = [...messages, userMessage];
+    // ✅ 1. Show user message immediately (OPTIMISTIC UPDATE)
+    const optimisticMessages = [...messages, userMessage];
+
+    const optimisticSession: ChatSession = {
+      ...currentSession,
+      messages: optimisticMessages,
+      title: generateSessionTitle(optimisticMessages),
+    };
+
+    setSessions((prev) =>
+      prev.map((s) => (s.id === optimisticSession.id ? optimisticSession : s)),
+    );
+    saveSession(optimisticSession);
+
     setInput("");
     setBotTyping(true);
 
     try {
-      const data = await getThinkBotResponse(input);
+      const data = await getThinkBotResponse(userMessage.content);
 
       let botContent = "I'm sorry, I couldn't process that.";
-      if (data.success && data.data) {
+
+      if (data?.success && data?.data) {
         if (data.data.answer) {
           botContent = data.data.answer;
         } else if (data.data.title && data.data.points) {
-          botContent = `### ${data.data.title}\n\n`;
-          if (Array.isArray(data.data.points)) {
-            botContent += data.data.points
-              .map((p: string) => `- ${p}`)
-              .join("\n");
-          }
+          botContent = `### ${data.data.title}\n\n${data.data.points
+            .map((p: string) => `- ${p}`)
+            .join("\n")}`;
         }
       }
 
@@ -122,51 +105,40 @@ export default function ThinkBotPage() {
         content: botContent,
         timestamp: new Date().toISOString(),
       };
-      updatedMessages.push(botMessage);
-    } catch (error: any) {
-      let errorMsg = "Sorry, something went wrong. Please try again later.";
 
-      if (error && error.error) {
-        errorMsg = error.error;
-      }
+      const finalMessages = [...optimisticMessages, botMessage];
 
-      if (error && error.details) {
-        try {
-          const detailsObj =
-            typeof error.details === "string"
-              ? JSON.parse(error.details)
-              : error.details;
-          if (detailsObj?.error?.message) {
-            errorMsg = detailsObj.error.message;
-          }
-        } catch (e) {
-          if (typeof error.details === "string" && error.details.length < 200) {
-            errorMsg += `: ${error.details}`;
-          }
-        }
-      }
+      const finalSession: ChatSession = {
+        ...currentSession,
+        messages: finalMessages,
+        title: generateSessionTitle(finalMessages),
+      };
 
+      setSessions((prev) =>
+        prev.map((s) => (s.id === finalSession.id ? finalSession : s)),
+      );
+      saveSession(finalSession);
+    } catch {
       const errorMessage: ChatMessage = {
         id: `bot-error-${++messageIdCounter.current}`,
         sender: "bot",
-        content: errorMsg,
+        content: "Something went wrong. Please try again.",
         timestamp: new Date().toISOString(),
       };
-      updatedMessages.push(errorMessage);
-    } finally {
-      // Update session with new messages
-      const updatedSession: ChatSession = {
-        ...currentSession,
-        messages: updatedMessages,
-        title: generateSessionTitle(updatedMessages),
-      };
-      saveSession(updatedSession);
+
+      const finalMessages = [...optimisticMessages, errorMessage];
+
       setSessions((prev) =>
-        prev.map((s) => (s.id === updatedSession.id ? updatedSession : s)),
+        prev.map((s) =>
+          s.id === currentSession.id ? { ...s, messages: finalMessages } : s,
+        ),
       );
+    } finally {
       setBotTyping(false);
     }
   };
+
+  /* ----------------------------- NEW CHAT ----------------------------- */
 
   const handleNewChat = () => {
     const newSession: ChatSession = {
@@ -176,46 +148,26 @@ export default function ThinkBotPage() {
       createdAt: Date.now(),
       expiresAt: Date.now() + SESSION_DURATION_DAYS * 24 * 60 * 60 * 1000,
     };
+
     saveSession(newSession);
     setSessions((prev) => [newSession, ...prev]);
     setCurrentSessionId(newSession.id);
     messageIdCounter.current = 0;
   };
 
-  const handleSelectSession = (sessionId: string) => {
-    setCurrentSessionId(sessionId);
-    const session = sessions.find((s) => s.id === sessionId);
-    if (session) {
-      const maxId = session.messages.reduce((max, msg) => {
-        const idNum = parseInt(msg.id.split("-")[1] || "0");
-        return Math.max(max, idNum);
-      }, 0);
-      messageIdCounter.current = maxId;
-    }
+  const handleSelectSession = (id: string) => {
+    setCurrentSessionId(id);
+    const session = sessions.find((s) => s.id === id);
+    messageIdCounter.current = session?.messages.length || 0;
   };
 
-  const handleDeleteSession = (sessionId: string) => {
-    deleteSession(sessionId);
-    setSessions((prev) => prev.filter((s) => s.id !== sessionId));
-
-    if (currentSessionId === sessionId) {
-      if (sessions.length > 1) {
-        const nextSession = sessions.find((s) => s.id !== sessionId);
-        if (nextSession) {
-          handleSelectSession(nextSession.id);
-        }
-      } else {
-        handleNewChat();
-      }
-    }
+  const handleDeleteSession = (id: string) => {
+    deleteSession(id);
+    setSessions((prev) => prev.filter((s) => s.id !== id));
   };
 
   const handleClearHistory = () => {
-    if (
-      window.confirm(
-        "Are you sure you want to clear the chat history? This action cannot be undone.",
-      )
-    ) {
+    if (confirm("Clear all chat history?")) {
       localStorage.removeItem(SESSIONS_STORAGE_KEY);
       setSessions([]);
       handleNewChat();
@@ -232,7 +184,8 @@ export default function ThinkBotPage() {
 
   return (
     <div className="flex h-screen md:h-[90vh] bg-linear-to-br from-green-50 to-green-100">
-      {/* Chat History Sidebar */}
+      {" "}
+      {/* Chat History Sidebar */}{" "}
       <Sidebar
         sessions={sessions}
         currentSessionId={currentSessionId}
@@ -241,31 +194,29 @@ export default function ThinkBotPage() {
         onNewChat={handleNewChat}
         onDeleteSession={handleDeleteSession}
         onClearAll={handleClearHistory}
-      />
-
-      {/* Main Content */}
+      />{" "}
+      {/* Main Content */}{" "}
       <div className="flex-1 flex flex-col p-4 md:p-10 overflow-hidden relative">
-        <WelcomeBanner userName={user?.name} />
-
-        {/* Chat Container */}
+        {" "}
+        <WelcomeBanner userName={user?.name} /> {/* Chat Container */}{" "}
         <div className="flex-1 bg-white rounded-3xl shadow-2xl p-4 flex flex-col overflow-hidden relative">
-          {/* Chat Messages */}
+          {" "}
+          {/* Chat Messages */}{" "}
           <ChatMessages
             messages={messages}
             botTyping={botTyping}
             userName={user?.name}
             messagesEndRef={messagesEndRef}
-          />
-
-          {/* Chat Input */}
+          />{" "}
+          {/* Chat Input */}{" "}
           <ChatInput
             input={input}
             onInputChange={setInput}
             onSend={handleSend}
             disabled={botTyping}
-          />
-        </div>
-      </div>
+          />{" "}
+        </div>{" "}
+      </div>{" "}
     </div>
   );
 }
