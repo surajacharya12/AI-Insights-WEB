@@ -21,6 +21,8 @@ export interface CourseAccordionProps {
     courseId?: string;
     userId?: string | number;
     isEnrolled?: boolean;
+    courseTitle?: string;
+    courseJson?: any;
 }
 
 // Gradient presets for chapters

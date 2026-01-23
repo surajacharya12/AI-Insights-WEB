@@ -220,6 +220,8 @@ export default function Course() {
                 courseId={courseId}
                 userId={user?.id}
                 isEnrolled={isEnrolled}
+                courseTitle={course.courseName}
+                courseJson={course.courseJson}
               />
 
               {/* Optional: ChapterContent */}

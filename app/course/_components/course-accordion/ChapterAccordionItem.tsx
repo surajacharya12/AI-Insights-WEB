@@ -12,6 +12,8 @@ import {
     PlayCircle,
     Zap,
     CheckCircle2,
+    RotateCw,
+    Loader2,
 } from "lucide-react";
 import { Chapter } from "./types";
 import TopicAccordionItem from "./TopicAccordionItem";
@@ -25,6 +27,8 @@ interface ChapterAccordionItemProps {
     savingTopic: string | null;
     isEnrolled: boolean;
     chapterProgress: { completed: number; total: number };
+    onRegenerate?: () => void;
+    isRegenerating?: boolean;
 }
 
 export default function ChapterAccordionItem({
@@ -36,6 +40,8 @@ export default function ChapterAccordionItem({
     savingTopic,
     isEnrolled,
     chapterProgress,
+    onRegenerate,
+    isRegenerating,
 }: ChapterAccordionItemProps) {
     const videoCount = chapter.topics?.reduce(
         (acc, t) => acc + (t.youtubeVideos?.length || 0),
@@ -106,6 +112,28 @@ export default function ChapterAccordionItem({
                                     </span>
                                 </div>
                             )}
+
+                            {/* Regenerate Button - Visible if topics are missing or on hover */}
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (!isRegenerating && onRegenerate) onRegenerate();
+                                }}
+                                disabled={isRegenerating}
+                                className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all duration-300
+                                    ${(chapter.topics?.length || 0) === 0
+                                        ? "bg-amber-100 text-amber-600 hover:bg-amber-200"
+                                        : "bg-gray-100 text-gray-500 hover:bg-indigo-100 hover:text-indigo-600 opacity-0 group-hover:opacity-100"
+                                    }`}
+                                title="Regenerate Chapter Content"
+                            >
+                                {isRegenerating ? (
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                ) : (
+                                    <RotateCw className="w-3 h-3" />
+                                )}
+                                <span>{(chapter.topics?.length || 0) === 0 ? "Generate Topics" : "Regenerate"}</span>
+                            </button>
                         </div>
                     </div>
 

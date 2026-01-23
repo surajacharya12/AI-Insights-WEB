@@ -18,14 +18,23 @@ import { CourseAccordionProps, Chapter, getGradient } from "./types";
 import ChapterAccordionItem from "./ChapterAccordionItem";
 
 export default function CourseAccordion({
-    chapters,
+    chapters: initialChapters,
     courseId,
     userId,
-    isEnrolled = false
+    isEnrolled = false,
+    courseTitle,
+    courseJson
 }: CourseAccordionProps) {
+    const [chapters, setChapters] = useState<Chapter[]>(initialChapters);
     const [completedTopics, setCompletedTopics] = useState<Record<string, boolean>>({});
     const [loading, setLoading] = useState(false);
     const [savingTopic, setSavingTopic] = useState<string | null>(null);
+    const [regeneratingChapter, setRegeneratingChapter] = useState<number | null>(null);
+
+    // Update local chapters if prop changes
+    useEffect(() => {
+        setChapters(initialChapters);
+    }, [initialChapters]);
 
     const totalTopics = chapters.reduce((acc, ch) => acc + (ch.topics?.length || 0), 0);
     const totalVideos = chapters?.reduce(
@@ -101,6 +110,35 @@ export default function CourseAccordion({
         },
         [courseId, userId, isEnrolled, completedTopics]
     );
+
+    const regenerateChapter = async (chapterIndex: number) => {
+        if (!courseId || !courseTitle || !courseJson) {
+            toast.error("Missing course data for regeneration");
+            return;
+        }
+
+        try {
+            setRegeneratingChapter(chapterIndex);
+            toast.info("Regenerating chapter content...");
+
+            const response = await axios.post(`${API_URL}/api/generate-course-content`, {
+                courseId,
+                courseTitle,
+                courseJson,
+                chapterIndex
+            });
+
+            if (response.data && response.data.CourseContent) {
+                setChapters(response.data.CourseContent);
+                toast.success("Chapter regenerated successfully!");
+            }
+        } catch (error) {
+            console.error("Error regenerating chapter:", error);
+            toast.error("Failed to regenerate chapter content");
+        } finally {
+            setRegeneratingChapter(null);
+        }
+    };
 
     // Calculate chapter progress
     const getChapterProgress = (chapterIndex: number, chapter: Chapter) => {
@@ -213,6 +251,8 @@ export default function CourseAccordion({
                                 savingTopic={savingTopic}
                                 isEnrolled={isEnrolled}
                                 chapterProgress={chapterProgress}
+                                onRegenerate={() => regenerateChapter(chapterIndex)}
+                                isRegenerating={regeneratingChapter === chapterIndex}
                             />
                         </motion.div>
                     );
