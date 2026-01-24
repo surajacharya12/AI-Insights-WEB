@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import API_URL from "../../../api/api_url";
 import { CourseAccordionProps, Chapter, getGradient } from "./types";
 import ChapterAccordionItem from "./ChapterAccordionItem";
+import { useUser } from "@/app/context/UserContext";
 
 export default function CourseAccordion({
     chapters: initialChapters,
@@ -25,6 +26,7 @@ export default function CourseAccordion({
     courseTitle,
     courseJson
 }: CourseAccordionProps) {
+    const { triggerEnrollmentRefresh } = useUser();
     const [chapters, setChapters] = useState<Chapter[]>(initialChapters);
     const [completedTopics, setCompletedTopics] = useState<Record<string, boolean>>({});
     const [loading, setLoading] = useState(false);
@@ -98,6 +100,8 @@ export default function CourseAccordion({
                     return updated;
                 });
 
+                triggerEnrollmentRefresh();
+
                 toast.success(
                     isCurrentlyCompleted ? "Topic marked as incomplete" : "Topic completed! 🎉"
                 );
@@ -108,7 +112,7 @@ export default function CourseAccordion({
                 setSavingTopic(null);
             }
         },
-        [courseId, userId, isEnrolled, completedTopics]
+        [courseId, userId, isEnrolled, completedTopics, triggerEnrollmentRefresh]
     );
 
     const regenerateChapter = async (chapterIndex: number) => {

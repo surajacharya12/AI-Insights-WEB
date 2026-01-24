@@ -16,7 +16,7 @@ interface CourseListProps {
 }
 
 export default function CourseList({ mode = "user" }: CourseListProps) {
-    const { user } = useUser();
+    const { user, enrollmentRefreshTrigger } = useUser();
     const [courseList, setCourseList] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -30,16 +30,29 @@ export default function CourseList({ mode = "user" }: CourseListProps) {
                     if (user?.id) {
                         url += `?userId=${user.id}`;
                     } else {
-                        // If user mode but no user ID, wait or return
                         return;
                     }
                 } else {
-                    // All courses
                     url += `?courseId=0`;
                 }
 
+                // Fetch both courses and enrollments to filter them out
+                let enrollments: any[] = [];
+                if (user?.id) {
+                    const enrollRes = await axios.get(`${API_URL}/api/enroll?userId=${user.id}`);
+                    enrollments = enrollRes.data || [];
+                }
+
                 const response = await axios.get(url);
-                setCourseList(response.data);
+                let fetchedCourses = response.data;
+
+                // Filter out already enrolled courses if in user mode
+                if (mode === "user" && enrollments.length > 0) {
+                    const enrolledCids = new Set(enrollments.map((e: any) => e.courses?.cid));
+                    fetchedCourses = fetchedCourses.filter((c: any) => !enrolledCids.has(c.cid));
+                }
+
+                setCourseList(fetchedCourses);
             } catch (error) {
                 console.error("Error fetching courses:", error);
                 toast.error("Failed to fetch courses.");
@@ -51,7 +64,7 @@ export default function CourseList({ mode = "user" }: CourseListProps) {
         if (mode === "all" || (mode === "user" && user)) {
             fetchCourses();
         }
-    }, [user, mode]);
+    }, [user, mode, enrollmentRefreshTrigger]);
 
     if (loading) {
         return (
