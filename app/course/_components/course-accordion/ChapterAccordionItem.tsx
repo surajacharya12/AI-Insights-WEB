@@ -114,17 +114,24 @@ export default function ChapterAccordionItem({
                             )}
 
                             {/* Regenerate Button - Visible if topics are missing or on hover */}
-                            <button
+                            <div
+                                role="button"
+                                tabIndex={0}
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     if (!isRegenerating && onRegenerate) onRegenerate();
                                 }}
-                                disabled={isRegenerating}
-                                className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all duration-300
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault();
+                                        if (!isRegenerating && onRegenerate) onRegenerate();
+                                    }
+                                }}
+                                className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all duration-300 cursor-pointer
                                     ${(chapter.topics?.length || 0) === 0
                                         ? "bg-amber-100 text-amber-600 hover:bg-amber-200"
                                         : "bg-gray-100 text-gray-500 hover:bg-indigo-100 hover:text-indigo-600 opacity-0 group-hover:opacity-100"
-                                    }`}
+                                    } ${isRegenerating ? "opacity-50 cursor-not-allowed" : ""}`}
                                 title="Regenerate Chapter Content"
                             >
                                 {isRegenerating ? (
@@ -133,7 +140,7 @@ export default function ChapterAccordionItem({
                                     <RotateCw className="w-3 h-3" />
                                 )}
                                 <span>{(chapter.topics?.length || 0) === 0 ? "Generate Topics" : "Regenerate"}</span>
-                            </button>
+                            </div>
                         </div>
                     </div>
 

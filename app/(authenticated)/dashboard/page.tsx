@@ -100,17 +100,14 @@ export default function DashboardPage() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2, duration: 0.5 }}
-                            className="space-y-6"
                         >
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-xl font-bold text-gray-900 tracking-tight">
-                                    Continue Learning
-                                </h3>
-                            </div>
-
                             {/* Only render EnrollCourseList if user.id exists */}
                             {user?.id ? (
-                                <EnrollCourseList userId={user.id} />
+                                <EnrollCourseList
+                                    userId={user.id}
+                                    filter="active"
+                                    header="Continue Learning"
+                                />
                             ) : (
                                 <p className="text-gray-500">Loading courses...</p>
                             )}
@@ -129,6 +126,21 @@ export default function DashboardPage() {
                             </div>
                             <CourseList mode="user" />
                         </motion.div>
+
+                        {/* Completed Courses Section */}
+                        {user?.id && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.6, duration: 0.5 }}
+                            >
+                                <EnrollCourseList
+                                    userId={user.id}
+                                    filter="completed"
+                                    header="Completed Courses"
+                                />
+                            </motion.div>
+                        )}
                     </div>
                 )}
             </div>

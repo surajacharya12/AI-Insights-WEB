@@ -16,6 +16,8 @@ interface UserContextType {
     setUser: (user: User | null) => void;
     refreshUser: () => Promise<void>;
     logout: () => void;
+    enrollmentRefreshTrigger: number;
+    triggerEnrollmentRefresh: () => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -23,6 +25,11 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export function UserProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+    const [enrollmentRefreshTrigger, setEnrollmentRefreshTrigger] = useState(0);
+
+    const triggerEnrollmentRefresh = () => {
+        setEnrollmentRefreshTrigger(prev => prev + 1);
+    };
 
     const fetchUserData = async () => {
         try {
@@ -73,7 +80,15 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     return (
-        <UserContext.Provider value={{ user, loading, setUser, refreshUser, logout }}>
+        <UserContext.Provider value={{
+            user,
+            loading,
+            setUser,
+            refreshUser,
+            logout,
+            enrollmentRefreshTrigger,
+            triggerEnrollmentRefresh
+        }}>
             {children}
         </UserContext.Provider>
     );

@@ -19,7 +19,7 @@ export function CourseCard({ course }: CourseCardProps) {
     const [hasMounted, setHasMounted] = useState(false);
     const [loading, setLoading] = useState(false);
     const router = useRouter();
-    const { user } = useUser();
+    const { user, triggerEnrollmentRefresh } = useUser();
 
     useEffect(() => {
         setHasMounted(true);
@@ -43,6 +43,7 @@ export function CourseCard({ course }: CourseCardProps) {
             });
             if (response.status === 200) {
                 toast.success('Successfully enrolled in course!');
+                triggerEnrollmentRefresh();
                 router.push('/dashboard');
             } else {
                 toast.error('Enrollment failed');
