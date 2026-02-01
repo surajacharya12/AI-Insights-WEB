@@ -10,11 +10,11 @@ const isLocalhost = typeof window !== 'undefined' &&
 // If local, we use the current hostname to avoid 127.0.0.1 vs localhost mismatches
 const API_URL = isLocalhost
     ? `http://${window.location.hostname}:3001`
-    : process.env.NEXT_PUBLIC_API_URL || "https://ai-insights-backend.vercel.app";
+    : process.env.NEXT_PUBLIC_API_URL;
 
 // Log the API URL for debugging
 if (typeof window !== 'undefined') {
-    const isMixedContent = window.location.protocol === 'https:' && API_URL.startsWith('http:');
+    const isMixedContent = window.location.protocol === 'https:' && (process.env.NEXT_PUBLIC_API_URL?.startsWith('http:') ?? false);
 
     console.log('📡 API Connectivity Debug:', {
         origin: window.location.origin,
