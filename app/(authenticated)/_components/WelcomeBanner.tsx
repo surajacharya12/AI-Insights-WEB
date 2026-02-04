@@ -51,7 +51,7 @@ export default function WelcomeBanner() {
                         <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-tight leading-tight">
                             Welcome to <br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-yellow-100 to-amber-200 drop-shadow-sm">
-                                Allinsights
+                                AI Insights
                             </span>
                         </h1>
                     </motion.div>
