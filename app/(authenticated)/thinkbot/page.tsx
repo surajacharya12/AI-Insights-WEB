@@ -7,6 +7,7 @@ import Sidebar from "./components/Sidebar";
 import ChatMessages from "./components/ChatMessages";
 import WelcomeBanner from "./components/WelcomeBanner";
 import ChatInput from "./components/ChatInput";
+import { toast } from "sonner";
 import { getThinkBotResponse } from "../../api/thinkbotApi";
 import {
   getAllSessions,
@@ -162,16 +163,35 @@ export default function ThinkBotPage() {
   };
 
   const handleDeleteSession = (id: string) => {
-    deleteSession(id);
-    setSessions((prev) => prev.filter((s) => s.id !== id));
+    const session = sessions.find((s) => s.id === id);
+    toast(`Delete "${session?.title || "this chat"}"?`, {
+      description: "This will permanently remove this session.",
+      action: {
+        label: "Delete",
+        onClick: () => {
+          deleteSession(id);
+          setSessions((prev) => prev.filter((s) => s.id !== id));
+          toast.success("Chat deleted");
+        },
+      },
+      className: "bg-white border-red-100",
+    });
   };
 
   const handleClearHistory = () => {
-    if (confirm("Clear all chat history?")) {
-      localStorage.removeItem(SESSIONS_STORAGE_KEY);
-      setSessions([]);
-      handleNewChat();
-    }
+    toast("Clear all chat history?", {
+      description: "All your conversations will be permanently deleted.",
+      action: {
+        label: "Clear All",
+        onClick: () => {
+          localStorage.removeItem(SESSIONS_STORAGE_KEY);
+          setSessions([]);
+          handleNewChat();
+          toast.success("History cleared");
+        },
+      },
+      className: "bg-white border-red-100",
+    });
   };
 
   if (loading) {

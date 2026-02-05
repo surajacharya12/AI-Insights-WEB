@@ -124,9 +124,18 @@ export default function ChatPdfPage() {
         ]);
     };
 
-    const deletePdf = async (pdf: PDF) => {
-        if (!confirm(`Delete "${pdf.fileName}"?`)) return;
+    const confirmDelete = (pdf: PDF) => {
+        toast(`Delete "${pdf.fileName}"?`, {
+            description: "This action cannot be undone.",
+            action: {
+                label: "Delete",
+                onClick: () => deletePdf(pdf),
+            },
+            className: "bg-white border-red-100",
+        });
+    };
 
+    const deletePdf = async (pdf: PDF) => {
         try {
             const response = await fetch(`${API_URL}/api/chatpdf/delete/${pdf.id}`, {
                 method: "DELETE",
@@ -139,11 +148,13 @@ export default function ChatPdfPage() {
                 if (selectedPdf?.id === pdf.id) {
                     setSelectedPdf(null);
                 }
-                toast.success(`🗑️ ${pdf.fileName} has been deleted.`);
+                toast.success(`🗑️ Deleted: ${pdf.fileName}`);
+            } else {
+                toast.error("⚠️ Failed to delete the PDF.");
             }
         } catch (error) {
             console.error("Error deleting PDF:", error);
-            toast.error("Failed to delete PDF.");
+            toast.error("⚠️ Error connecting to server.");
         }
     };
 
@@ -262,7 +273,7 @@ export default function ChatPdfPage() {
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        deletePdf(pdf);
+                                        confirmDelete(pdf);
                                     }}
                                     className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition"
                                 >

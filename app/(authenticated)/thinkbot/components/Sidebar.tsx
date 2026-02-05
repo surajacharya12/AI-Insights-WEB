@@ -53,25 +53,23 @@ export default function Sidebar({
           </div>
         ) : (
           sessions.map((session) => (
-            <motion.button
+            <motion.div
               key={session.id}
               onClick={() => {
                 onSelectSession(session.id);
               }}
               whileHover={{ x: 4 }}
-              className={`w-full text-left px-3 py-2 rounded-lg transition flex items-center justify-between group ${
-                currentSessionId === session.id
+              className={`w-full text-left px-3 py-2 rounded-lg transition flex items-center justify-between group cursor-pointer ${currentSessionId === session.id
                   ? "bg-green-100 border-l-4 border-green-600"
                   : "hover:bg-gray-100"
-              }`}
+                }`}
             >
               <div className="flex-1 min-w-0">
                 <p
-                  className={`text-sm truncate ${
-                    currentSessionId === session.id
+                  className={`text-sm truncate ${currentSessionId === session.id
                       ? "font-bold text-green-900"
                       : "text-gray-700"
-                  }`}
+                    }`}
                 >
                   {session.title}
                 </p>
@@ -84,11 +82,11 @@ export default function Sidebar({
                   e.stopPropagation();
                   onDeleteSession(session.id);
                 }}
-                className="opacity-0 group-hover:opacity-100 transition text-red-600 hover:text-red-700"
+                className="opacity-0 group-hover:opacity-100 transition text-red-600 hover:text-red-700 p-1 rounded-md hover:bg-red-50"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
-            </motion.button>
+            </motion.div>
           ))
         )}
       </div>

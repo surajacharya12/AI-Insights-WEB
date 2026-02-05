@@ -45,24 +45,33 @@ export default function ResourcesPage() {
     const handleDeleteResource = async (resourceId: number) => {
         if (!user?.email) return;
 
-        if (confirm("Are you sure you want to delete this resource?")) {
-            try {
-                const response = await fetch(`${API_URL}/api/resources/${resourceId}?userEmail=${user.email}`, {
-                    method: "DELETE",
-                });
+        const resource = resources.find(r => r.id === resourceId);
 
-                if (response.ok) {
-                    setResources(resources.filter(r => r.id !== resourceId));
-                    toast.success("Resource deleted successfully.");
-                } else {
-                    const data = await response.json();
-                    toast.error(data.error || "Failed to delete resource.");
-                }
-            } catch (error) {
-                console.error("Error deleting resource:", error);
-                toast.error("An error occurred.");
-            }
-        }
+        toast(`Delete "${resource?.topic || "this resource"}"?`, {
+            description: "This action cannot be undone.",
+            action: {
+                label: "Delete",
+                onClick: async () => {
+                    try {
+                        const response = await fetch(`${API_URL}/api/resources/${resourceId}?userEmail=${user.email}`, {
+                            method: "DELETE",
+                        });
+
+                        if (response.ok) {
+                            setResources(resources.filter(r => r.id !== resourceId));
+                            toast.success("Resource deleted successfully.");
+                        } else {
+                            const data = await response.json();
+                            toast.error(data.error || "Failed to delete resource.");
+                        }
+                    } catch (error) {
+                        console.error("Error deleting resource:", error);
+                        toast.error("An error occurred.");
+                    }
+                },
+            },
+            className: "bg-white border-red-100",
+        });
     };
 
     const handleView = async (resource: Resource) => {
